@@ -449,12 +449,12 @@ void Application::Keyboard( int key, int scancode, int action, int modifiers )
 
 	if (GLFW_KEY_D == key && GLFW_RELEASE == action)
 	{
-		scene->SetPower(+.5f);
+		scene->SetPower(+.25f);
 	}
 
 	if (GLFW_KEY_A == key && GLFW_RELEASE == action)
 	{
-		scene->SetPower(-.5f);
+		scene->SetPower(-.25f);
 	}
 }
 
