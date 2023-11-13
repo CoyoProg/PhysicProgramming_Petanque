@@ -83,7 +83,9 @@
     </ClCompile>
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="Broadphase.cpp" />
-    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Player.cpp">
+      <Filter>code\Petanque</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\application.h">
@@ -159,6 +161,8 @@
       <Filter>code\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Broadphase.h" />
-    <ClInclude Include="Player.h" />
+    <ClInclude Include="Player.h">
+      <Filter>code\Petanque</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

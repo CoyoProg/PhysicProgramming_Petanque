@@ -6,6 +6,7 @@
 #include "..\Intersection.h"
 #include "../Shape.h"
 #include "../Broadphase.h"
+#include <iostream>
 
 Scene::~Scene() 
 {
@@ -41,36 +42,37 @@ void Scene::Initialize()
 {
 	srand(time(NULL));
 
-	for (int i = 1; i < 100; i++)
+	Body body;
+	for (int i = 0; i < 7; i++)
 	{
 		/* Sphere */
-		Body ball;
-		ball.position = Vec3((rand() % 10) / 10.f, (rand() % 10) / 10.f, 5 * i);
-		ball.orientation = Quat(0, 0, 0, 1);
-		ball.shape = new ShapeSphere(1.0f);
-		ball.inverseMass = 1.f;
-		ball.friction = .9f;
-		ball.elasticity = .5f;
-		ball.linearVelocity = Vec3(0, 0, 0);
-		bodies.push_back(ball);
+		body.position = Vec3(1, 1, 2.5);
+		body.orientation = Quat(0, 0, 0, 1);
+
+		if (i == 0)
+		{
+			body.shape = new ShapeSphere(.4f);
+			body.inverseMass = 0.9f;
+			body.friction = 1.f;
+
+		}
+		else
+		{
+			body.shape = new ShapeSphere(1.0f);
+			body.inverseMass = 0.5f;
+			body.friction = .8f;
+		}
+
+		body.elasticity = 0.1f;
+		bodies.push_back(body);
 	}
 
-	/* Earth */
-	Body earth;
-	earth.position = Vec3(0, 0, -1000);
-	earth.orientation = Quat(0, 0, 0, 1);
-	earth.shape = new ShapeSphere(1000.0f);
-	earth.inverseMass = 0.0f;
-	earth.friction = .9f;
-	earth.elasticity = 1.0f;
-	bodies.push_back(earth);
-
-	Body body;
 	float incrementalAngle = 0;
 	float radiusArena = 5;
 	float gap = 9;
 	float n_balls = 30;
 
+	/* Arena */
 	for (int i = 0; i < n_balls; i++)
 	{
 		body.position = Vec3(cos(incrementalAngle) * radiusArena * gap, sin(incrementalAngle) * radiusArena * gap, 0);
@@ -82,6 +84,24 @@ void Scene::Initialize()
 		body.linearVelocity = Vec3(0, 0, 0);
 		incrementalAngle += 2 * 3.14159265 / n_balls;
 		bodies.push_back(body);
+	}
+
+	/* Earth */
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			float radius = 800.0f;
+			float x = (i - 1) * radius * 0.25f;
+			float y = (j - 1) * radius * 0.25f;
+			body.position = Vec3(x, y, -radius);
+			body.orientation = Quat(0, 0, 0, 1);
+			body.shape = new ShapeSphere(radius);
+			body.inverseMass = 0.0f;
+			body.elasticity = 0.99f;
+			body.friction = 0.5f;
+			bodies.push_back(body);
+		}
 	}
 }
 
@@ -102,6 +122,22 @@ void Scene::Update(const float dt_sec)
 		// <=> I = F * dt <=> I = m * g * dt
 		Vec3 impulseGravity = Vec3(0, 0, -10) * mass * dt_sec;
 		body.ApplyImpulseLinear(impulseGravity);
+
+		if (body.elasticity == 0.1f)
+		{
+			float length = body.linearVelocity.GetLengthSqr();
+
+			if (length > 0.05f)
+			{
+				body.linearVelocity *= 0.99f;
+				body.angularVelocity *= 0.98f;
+			}
+			else
+			{
+				body.linearVelocity = Vec3(0,0,0);
+				body.angularVelocity = Vec3(0, 0, 0);
+			}
+		}
 	}
 
 	// Broadphase
@@ -165,4 +201,32 @@ void Scene::Update(const float dt_sec)
 			bodies[i].Update(timeRemaining);
 		}
 	}
+}
+
+void Scene::ThrowLaBouleDePetanque(Vec3 positionP, Vec3 cameraRotation)
+{
+	if (round >= 7)
+	{
+		round = 0;
+	}
+
+	Body& body = bodies[round];
+	if (body.elasticity == 0.1f)
+	{
+		body.position = positionP;
+		body.linearVelocity = cameraRotation * powerBourrinage;
+		body.angularVelocity = Vec3(0, -4, 0);
+	}
+
+	round++;
+}
+
+void Scene::SetPower(float amountP)
+{
+	powerBourrinage += amountP;
+
+	if (powerBourrinage < .5f)
+		powerBourrinage = 0.5f;
+
+	std::cout << powerBourrinage << std::endl;
 }

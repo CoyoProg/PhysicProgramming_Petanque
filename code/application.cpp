@@ -77,7 +77,8 @@ void Application::Initialize() {
 	scene->Reset();
 
 	m_models.reserve( scene->bodies.size() );
-	for ( int i = 0; i < scene->bodies.size(); i++ ) {
+	for ( int i = 0; i < scene->bodies.size(); i++ ) 
+	{
 		Model * model = new Model();
 		model->BuildFromShape( scene->bodies[ i ].shape );
 		model->MakeVBO( &deviceContext );
@@ -378,14 +379,16 @@ void Application::MouseMoved( float x, float y ) {
 	Vec2 ds = newPosition - m_mousePosition;
 	m_mousePosition = newPosition;
 
-	float sensitivity = 0.01f;
+	float sensitivity = -0.001f;
 	m_cameraPositionTheta += ds.y * sensitivity;
 	m_cameraPositionPhi += ds.x * sensitivity;
 
-	if ( m_cameraPositionTheta < 0.14f ) {
+	if ( m_cameraPositionTheta < 0.14f ) 
+	{
 		m_cameraPositionTheta = 0.14f;
 	}
-	if ( m_cameraPositionTheta > 3.0f ) {
+	if ( m_cameraPositionTheta > 3.0f ) 
+	{
 		m_cameraPositionTheta = 3.0f;
 	}
 }
@@ -438,6 +441,21 @@ void Application::Keyboard( int key, int scancode, int action, int modifiers )
 	if ( GLFW_KEY_Y == key && ( GLFW_PRESS == action || GLFW_REPEAT == action ) ) {
 		m_stepFrame = m_isPaused && !m_stepFrame;
 	}
+
+	if (GLFW_KEY_E == key && GLFW_RELEASE == action) 
+	{
+		scene->ThrowLaBouleDePetanque(Vec3(0,0,5), camRotation);
+	}
+
+	if (GLFW_KEY_D == key && GLFW_RELEASE == action)
+	{
+		scene->SetPower(+.5f);
+	}
+
+	if (GLFW_KEY_A == key && GLFW_RELEASE == action)
+	{
+		scene->SetPower(-.5f);
+	}
 }
 
 /*
@@ -461,7 +479,7 @@ void Application::MainLoop() {
 			time = GetTimeMicroseconds();
 		}
 		timeLastFrame = time;
-		printf( "\ndt_ms: %.1f    ", dt_us * 0.001f );
+		//printf( "\ndt_ms: %.1f    ", dt_us * 0.001f );
 
 		// Get User Input
 		glfwPollEvents();
@@ -503,7 +521,7 @@ void Application::MainLoop() {
 			avgTime = ( avgTime * float( numSamples ) + dt_us ) / float( numSamples + 1 );
 			numSamples++;
 
-			printf( "frame dt_ms: %.2f %.2f %.2f", avgTime * 0.001f, maxTime * 0.001f, dt_us * 0.001f );
+			//printf( "frame dt_ms: %.2f %.2f %.2f", avgTime * 0.001f, maxTime * 0.001f, dt_us * 0.001f );
 		}
 
 		// Draw the Scene
@@ -541,18 +559,17 @@ void Application::UpdateUniforms() {
 		// Update the uniform buffer with the camera information
 		//
 		{
-			Vec3 camPos = Vec3( 10, 0, 5 ) * 1.25f;
-			Vec3 camLookAt = Vec3( 0, 0, 1 );
-			Vec3 camUp = Vec3( 0, 0, 1 );
+			Vec3 camPos = Vec3(0, 0, 5);
+			Vec3 camLookAt = Vec3(0, 0, 0);
+			Vec3 camUp = Vec3(0, 0, 1);
 
-			camPos.x = cosf( m_cameraPositionPhi ) * sinf( m_cameraPositionTheta );
-			camPos.y = sinf( m_cameraPositionPhi ) * sinf( m_cameraPositionTheta );
-			camPos.z = cosf( m_cameraPositionTheta );
-			camPos *= m_cameraRadius;
-
-			camPos += m_cameraFocusPoint;
-
-			camLookAt = m_cameraFocusPoint;
+			camLookAt.x = cosf(m_cameraPositionPhi) * sinf(m_cameraPositionTheta);
+			camLookAt.y = sinf(m_cameraPositionPhi) * sinf(m_cameraPositionTheta);
+			camLookAt.z = cosf(m_cameraPositionTheta);
+			camLookAt *= m_cameraRadius;
+			camRotation = camLookAt;
+			//camPos += m_cameraFocusPoint;
+			//camLookAt = m_cameraFocusPoint;
 
 			int windowWidth;
 			int windowHeight;
@@ -560,7 +577,7 @@ void Application::UpdateUniforms() {
 
 			const float zNear   = 0.1f;
 			const float zFar    = 1000.0f;
-			const float fovy	= 45.0f;
+			const float fovy	= 90.f;
 			const float aspect	= (float)windowHeight / (float)windowWidth;
 			camera.matProj.PerspectiveVulkan( fovy, aspect, zNear, zFar );
 			camera.matProj = camera.matProj.Transpose();

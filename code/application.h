@@ -83,7 +83,7 @@ private:
 	float m_cameraRadius;
 	bool m_isPaused;
 	bool m_stepFrame;
-
+	Vec3 camRotation{ 0,0,0 };
 	std::vector< RenderModel > m_renderModels;
 
 	static const int WINDOW_WIDTH = 1200;
